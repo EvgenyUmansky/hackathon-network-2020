@@ -1,1 +1,1 @@
-# hachathon-network-2020
+# hackathon-network-2020
