@@ -73,7 +73,7 @@ def create_tcp_connection_client():
         tcp_client_socket.connect((server_tcp_ip, server_tcp_port)) # connect the tcp socket to the server
 
         # send the team name to the server
-        tcp_client_socket.sendall(team_name)
+        tcp_client_socket.sendall(team_name.encode())
 
         while True:
             data = tcp_client_socket.recv(1024)
