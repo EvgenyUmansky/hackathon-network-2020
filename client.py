@@ -10,7 +10,8 @@ ip = '127.0.0.1' # localhost
 
 # ports
 udp_port = 8081 # udp port on my localhost
-tcp_port = 9090 # tcp port on my localhost
+client_tcp_port = 9090 # tcp port on my localhost
+server_tcp_port = 0
 # udp_port = 13117 # udp port for sending offers
 # tcp_port = 2063 # tcp port we get from the course
 
@@ -34,16 +35,16 @@ def create_udp_connection_client():
 
             magic_cookie = server_data[0].hex()
             msg_type = server_data[1].hex()
-            server_port = server_data[2].hex()
+            server_tcp_port = server_data[2].hex()
 
             if magic_cookie == 'feedbeef' and msg_type == '02':
-                sent = udp_server_socket.sendto(b'Pink fluffy unicorn dancing', server_address)
-                print('sent {} bytes back to {}'.format(
-                    sent, server_address))
+                break
+
         except Exception as err:
             print(err)
 
     udp_server_socket.close()
     return
 
+print("Client started, listening for offer requests...")
 create_udp_connection_client()

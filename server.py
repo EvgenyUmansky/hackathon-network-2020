@@ -28,9 +28,9 @@ tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcp_server_socket.bind((ip, tcp_port)) # bind the tcp socket to ip of the machine and our tcp port
 tcp_server_socket.listen(1) # listen for incoming connections, only 1 allowed to be unaccepted
 
+players = {}
 
 def create_udp_connection_server():
-    players = {}
     # create udp socket
     udp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
