@@ -46,9 +46,6 @@ def create_udp_connection_server():
         except Exception as err:
             print(err)
 
-        
-        data, client_address = udp_server_socket.recvfrom(1024)
-        print(data, client_address)
     udp_server_socket.close()
     return
 

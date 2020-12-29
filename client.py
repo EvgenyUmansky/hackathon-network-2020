@@ -18,12 +18,12 @@ tcp_port = 9090 # tcp port on my localhost
 
 def create_udp_connection_client():
     # Create a UDP socket
-    udp_client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp_client_socket.bind(('localhost', udp_port))
+    udp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_server_socket.bind(('localhost', udp_port))
 
     while True:
         try:
-            data, server_address = udp_client_socket.recvfrom(1024)
+            data, server_address = udp_server_socket.recvfrom(1024)
             
             print('received {} bytes from {}'.format(
                 len(data), server_address))
@@ -37,13 +37,13 @@ def create_udp_connection_client():
             server_port = server_data[2].hex()
 
             if magic_cookie == 'feedbeef' and msg_type == '02':
-                sent = udp_client_socket.sendto(b'Ron', ('', server_address))
+                sent = udp_server_socket.sendto(b'Pink fluffy unicorn dancing', server_address)
                 print('sent {} bytes back to {}'.format(
                     sent, server_address))
         except Exception as err:
             print(err)
 
-    udp_client_socket.close()
+    udp_server_socket.close()
     return
 
 create_udp_connection_client()
