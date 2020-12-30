@@ -10,18 +10,18 @@ threads_counter = 0
 welcome_message = ''
 
 # network ip
-# partly_ip = '127.0.0.' # localhost
-# server_ip = '127.0.0.1'
+partly_ip = '127.0.0.' # localhost
+server_ip = '127.0.0.1'
 
-partly_ip = '172.1.0.'
-server_ip = scapy.get_if_addr('eth1') # dev
+# partly_ip = '172.1.0.'
+# server_ip = scapy.get_if_addr('eth1') # dev
 # server_ip = scapy.get_if_addr('eth2') # test
 
 # ports
-# udp_port = 8081 # udp port on my localhost
-# tcp_port = 9090 # tcp port on my localhost
-tcp_port = 2008 # tcp port we get from the course
-udp_port = 13117 # udp port for sending offers
+udp_port = 8081 # udp port on my localhost
+tcp_port = 9091 # tcp port on my localhost
+# tcp_port = 2008 # tcp port we get from the course
+# udp_port = 13117 # udp port for sending offers
 
 # create udp message
 magic_cookie = bytes.fromhex('feedbeef') # to hex byte string
@@ -63,7 +63,7 @@ def create_udp_connection_server():
             for i in range(0, 256):
                 try:
                     client_ip = partly_ip + str(i) # to all IPs in the system
-                    address = (partly_ip, udp_port) # define new address, one of 172.1.0.0-255 (or 127.0.0.0-255 if local)
+                    address = ('127.0.0.1', udp_port) # define new address, one of 172.1.0.0-255 (or 127.0.0.0-255 if local)
                     udp_server_socket.sendto(packed_message, address) # send the offer to defined address
                 except:
                     pass

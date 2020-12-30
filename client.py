@@ -8,15 +8,15 @@ import msvcrt
 
 
 # network ip
-# client_ip = '127.0.0.1' # localhost
-client_ip = scapy.get_if_addr('eth1') # dev
+client_ip = '127.0.0.1' # localhost
+# client_ip = scapy.get_if_addr('eth1') # dev
 # client_ip = scapy.get_if_addr('eth2') # test
 
 # ports
-# udp_port = 8081 # udp port on my localhost
-# client_tcp_port = 9090 # tcp port on my localhost
-udp_port = 13117 # udp port for sending offers
-client_tcp_port = 2008 # tcp port we get from the course
+udp_port = 8081 # udp port on my localhost
+client_tcp_port = 9090 # tcp port on my localhost
+# udp_port = 13117 # udp port for sending offers
+# client_tcp_port = 2063 # tcp port we get from the course
 server_tcp_ip = None
 server_tcp_port = None
 
