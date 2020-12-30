@@ -74,7 +74,6 @@ def create_udp_connection_server():
 
     # close udp stream
     udp_server_socket.close()
-    print('FINISHED THE UDP')
     threads_counter -=1
     return
 
@@ -89,10 +88,8 @@ def create_teams_tcp():
             if isinstance(s, socket.socket):
                 # create tcp connection with players
                 client_connection, client_address = tcp_server_socket.accept()
-                print('connection from', client_address)
                 team_name = client_connection.recv(1024).decode("utf-8")
                 players[team_name] = (client_address, client_connection)
-                print(players.keys())
 
                 # organaze random teams in 2 groups
                 teams_list=list(players.keys())
@@ -106,7 +103,6 @@ def create_teams_tcp():
                 group_1 = { i : 0 for i in group_1_list }
                 group_2 = { i : 0 for i in group_2_list }
 
-    print('FINISHED THE TCP Group')
     group_1_names = '\n'.join(group_1.keys())
     group_2_names = '\n'.join(group_2.keys())
     welcome_message = f"Welcome to Keyboard Spamming Battle Royale.\nGroup 1:\n==\n{group_1_names}\nGroup 2:\n==\n{group_2_names}\nStart pressing keys on your keyboard as fast as you can!!"
@@ -137,7 +133,6 @@ def create_teams_tcp():
     for key, client_data in players.items():
         client_data[1].sendall(summary.encode())
 
-    print('FINISHED THE TCP!!!')
     threads_counter -= 1
     return
     
@@ -161,14 +156,11 @@ def game(team_name, client_data):
                     # count scores for two teams
                     if team_name in group_1:
                         group_1_score += len(key_pressed)
-                        print(group_1_score)
                     elif team_name in group_2:
                         group_2_score += len(key_pressed)
-                        print(group_2_score)
                 except Exception as e:
                     pass
 
-    print('FINISHED THE TCP game')
     threads_counter -= 1
     return
 
