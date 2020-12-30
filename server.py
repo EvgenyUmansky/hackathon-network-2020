@@ -7,6 +7,7 @@ import _thread
 import select
 
 threads_counter = 0
+game_is_on = True
 
 # network ip
 partly_ip = '127.0.0.' # localhost
@@ -35,9 +36,12 @@ tcp_server_socket.bind((server_ip, tcp_port)) # bind the tcp socket to ip of the
 tcp_server_socket.listen(1) # listen for incoming connections, only 1 allowed to be unaccepted
 # tcp_server_socket.settimeout(1)
 
-players_address = {}
+players = {}
 group_1 = {}
 group_2 = {}
+group_1_score = 0
+group_2_score = 0
+
 
 def create_udp_connection_server():
     global threads_counter 
@@ -80,16 +84,16 @@ def create_teams_tcp():
     while time.time() <= time_end_broadcast: # check if passed 10 seconds
         # Wait for a connection
         
-        readable, writable, errored = select.select([tcp_server_socket], [], [], 0)
+        readable, writable, exceptional = select.select([tcp_server_socket], [], [], 0)
         for s in readable:
             if isinstance(s, socket.socket):
                 client_connection, client_address = tcp_server_socket.accept()
                 print('connection from', client_address)
                 team_name = client_connection.recv(1024).decode("utf-8")
-                players_address[team_name] = client_address
-                print(players_address)
+                players[client_address[0]] = team_name
+                print(players)
 
-                teams_list=list(players_address.keys())
+                teams_list=list(players.keys())
                 random.shuffle(teams_list)
 
                 half = len(teams_list) // 2
@@ -103,11 +107,37 @@ def create_teams_tcp():
     threads_counter -= 1
     return
 
+def game():
+    global game_is_on, group_1_score, group_2_score, threads_counter
+
+    welcome_message = f"Welcome to Keyboard Spamming Battle Royale.\nGroup 1:\n==\n{group_1}Group 2:\n==\n{group_2}\nStart pressing keys on your keyboard as fast as you can!!"
+    game_is_on = True
+
+    start_game_time = time.time()
+    while time.time() - start_game_time <= 10:
+        readable, writable, exceptional = select.select([tcp_server_socket], [], [], 0)
+        for s in readable:
+            if isinstance(s, socket.socket):
+                client_connection, client_address = tcp_server_socket.accept()
+                tcp_server_socket.sendall(welcome_message.encode())
+                key_pressed = client_connection.recv(1024).decode("utf-8")
+
+                team = players[client_address[0]]
+                if team in group_1:
+                    group_1_score += len(key_pressed.encode())
+                elif team in group_2:
+                    group_2_score += len(key_pressed.encode())
+
+    threads_counter -= 1
+    return
+
 while True:
     try:
         _thread.start_new_thread(create_udp_connection_server, ())
         threads_counter += 1
         _thread.start_new_thread(create_teams_tcp, ())
+        threads_counter += 1
+        _thread.start_new_thread(game(), ())
         threads_counter += 1
     except Exception as e:
         # pass

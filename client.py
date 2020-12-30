@@ -2,6 +2,9 @@ import socket
 import time
 import scapy.all as scapy
 import struct
+import select
+import getch
+
 
 # network ip
 client_ip = '127.0.0.1' # localhost
@@ -64,9 +67,9 @@ def create_udp_connection_client():
 def create_tcp_connection_client():
     if server_tcp_port is None or server_tcp_port is None:
         return
-    
-    print("Received offer from {}, attempting to connect...".format(server_tcp_ip))
 
+    print("Received offer from {}, attempting to connect...".format(server_tcp_ip))
+    
     try:
         # config tcp
         tcp_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # create tcp socket
@@ -74,6 +77,29 @@ def create_tcp_connection_client():
 
         # send the team name to the server
         tcp_client_socket.sendall(team_name.encode())
+
+        # Receive the data in small chunks and retransmit it forever...
+        # Start Game:
+        # spouse to get the message of starting the game from the server
+        data = tcp_client_socket.recv(1024).decode()
+        if data:
+            print(data)
+            # if got the welcome message - start 
+            data = None
+            tcp_client_socket.setblocking(False)
+            tcp_client_socket.send(getch.getche().encode())
+        while True:
+            # check if client got message of game over: true - print the winners.
+            # false keep sending keys to server.
+            try:
+                data = tcp_client_socket.recv(1024)
+            except:
+                pass
+            if data:
+                print(data)
+                break
+            else:
+                tcp_client_socket.send(getch.getche().encode())
 
     except Exception as e: 
         print(e)
@@ -85,6 +111,7 @@ def create_tcp_connection_client():
     global is_connected
     is_connected = False
     return
+
 
 while True:
     create_udp_connection_client()
