@@ -3,19 +3,20 @@ import time
 import scapy.all as scapy
 import struct
 import select
-import getch
+# import getch
+import msvcrt
 
 
 # network ip
-client_ip = '127.0.0.1' # localhost
-# client_ip = scapy.get_if_addr('eth1') # dev
+# client_ip = '127.0.0.1' # localhost
+client_ip = scapy.get_if_addr('eth1') # dev
 # client_ip = scapy.get_if_addr('eth2') # test
 
 # ports
-udp_port = 8081 # udp port on my localhost
-client_tcp_port = 9090 # tcp port on my localhost
-# udp_port = 13117 # udp port for sending offers
-# client_tcp_port = 2063 # tcp port we get from the course
+# udp_port = 8081 # udp port on my localhost
+# client_tcp_port = 9090 # tcp port on my localhost
+udp_port = 13117 # udp port for sending offers
+client_tcp_port = 2008 # tcp port we get from the course
 server_tcp_ip = None
 server_tcp_port = None
 
@@ -87,19 +88,20 @@ def create_tcp_connection_client():
             # if got the welcome message - start 
             data = None
             tcp_client_socket.setblocking(False)
-            tcp_client_socket.send(getch.getche().encode())
+            # tcp_client_socket.send(getch.getche().encode())
+            tcp_client_socket.send(msvcrt.getch())
         while True:
             # check if client got message of game over: true - print the winners.
             # false keep sending keys to server.
             try:
-                data = tcp_client_socket.recv(1024)
+                data = tcp_client_socket.recv(1024).decode()
             except:
                 pass
             if data:
                 print(data)
                 break
             else:
-                tcp_client_socket.send(getch.getche().encode())
+                tcp_client_socket.send(msvcrt.getch())
 
     except Exception as e: 
         print(e)
