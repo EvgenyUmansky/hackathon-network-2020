@@ -2,7 +2,11 @@ import socket
 import time
 import scapy.all as scapy
 import struct
+import random
+import _thread
+import select
 
+threads_counter = 0
 
 # network ip
 partly_ip = '127.0.0.' # localhost
@@ -29,10 +33,14 @@ packed_message = struct.pack('4s 1s 2s', magic_cookie, msg_type, server_port) # 
 tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # open tcp socket
 tcp_server_socket.bind((server_ip, tcp_port)) # bind the tcp socket to ip of the machine and our tcp port
 tcp_server_socket.listen(1) # listen for incoming connections, only 1 allowed to be unaccepted
+# tcp_server_socket.settimeout(1)
 
-players = {}
+players_address = {}
+group_1 = {}
+group_2 = {}
 
 def create_udp_connection_server():
+    global threads_counter 
     # create udp socket
     udp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -47,7 +55,7 @@ def create_udp_connection_server():
     print("Server started, listening on IP address " + str(server_ip))
 
     try:
-        while time.time() < time_end_broadcast: # check if passed 10 seconds
+        while time.time() <= time_end_broadcast: # check if passed 10 seconds
             for i in range(0, 256):
                 try:
                     client_ip = partly_ip + str(i) # to all IPs in the system
@@ -61,38 +69,49 @@ def create_udp_connection_server():
 
     # close udp stream
     udp_server_socket.close()
+    print('FINISHED THE UDP')
+    threads_counter -=1
     return
 
 
-def create_tcp_connection_server():
-    try:
-        while True:
-            # Wait for a connection
-            print('waiting for a connection...')
-            client_connection, client_address = tcp_server_socket.accept()
-            try:
+def create_teams_tcp():
+    global group_1, group_2, threads_counter
+    time_end_broadcast = time.time() + 10 # when to finish the sending of offers (10 secs)
+    while time.time() <= time_end_broadcast: # check if passed 10 seconds
+        # Wait for a connection
+        
+        readable, writable, errored = select.select([tcp_server_socket], [], [], 0)
+        for s in readable:
+            if isinstance(s, socket.socket):
+                client_connection, client_address = tcp_server_socket.accept()
                 print('connection from', client_address)
+                team_name = client_connection.recv(1024).decode("utf-8")
+                players_address[team_name] = client_address
+                print(players_address)
 
-                # Receive the data in small chunks and retransmit it forever...
-                while True:
-                    data = client_connection.recv(1024)
-                    print('received {!r}'.format(data))
-                    if data:
-                        print('sending data back to the client')
-                        client_connection.sendall(data)
-                    else:
-                        print('no data from', client_address)
-                        break
-            except:
-                pass
+                teams_list=list(players_address.keys())
+                random.shuffle(teams_list)
 
-    except:
-        pass
+                half = len(teams_list) // 2
+                group_1_list = teams_list[:half] 
+                group_2_list = teams_list[half:]
 
-    finally:
-        tcp_server_socket.close()
+                group_1 = { i : 0 for i in group_1_list }
+                group_2 = { i : 0 for i in group_2_list }
+
+    print('FINISHED THE TCP')
+    threads_counter -= 1
     return
 
 while True:
-    create_udp_connection_server()
-    create_tcp_connection_server()
+    try:
+        _thread.start_new_thread(create_udp_connection_server, ())
+        threads_counter += 1
+        _thread.start_new_thread(create_teams_tcp, ())
+        threads_counter += 1
+    except Exception as e:
+        # pass
+        print(e)
+    while threads_counter > 0:
+        pass
+
