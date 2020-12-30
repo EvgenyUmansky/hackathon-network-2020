@@ -29,12 +29,6 @@ msg_type = bytes.fromhex('02') # to hex byte string
 server_port = bytes.fromhex(str(tcp_port)) # to hex byte string
 packed_message = struct.pack('4s 1s 2s', magic_cookie, msg_type, server_port) # 7 bytes for all
 
-# config tcp, we need to open the tcp socket before the udp offers 
-# because we start to recieve attemptings to connect before 10 seconds of udp offers are finished
-tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # open tcp socket
-tcp_server_socket.bind((server_ip, tcp_port)) # bind the tcp socket to ip of the machine and our tcp port
-tcp_server_socket.listen(1) # listen for incoming connections, only 1 allowed to be unaccepted
-# tcp_server_socket.settimeout(1)
 
 # data about players
 players = {}
@@ -165,6 +159,13 @@ def game(team_name, client_data):
     return
 
 while True:
+    # config tcp, we need to open the tcp socket before the udp offers 
+    # because we start to recieve attemptings to connect before 10 seconds of udp offers are finished
+    tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # open tcp socket
+    tcp_server_socket.bind((server_ip, tcp_port)) # bind the tcp socket to ip of the machine and our tcp port
+    tcp_server_socket.listen(1) # listen for incoming connections, only 1 allowed to be unaccepted
+    # tcp_server_socket.settimeout(1)
+
     # clear the lists 
     players = {}
     group_1 = {}
@@ -177,11 +178,10 @@ while True:
         threads_counter += 1
         _thread.start_new_thread(create_teams_tcp, ())
         threads_counter += 1
-        # _thread.start_new_thread(game(), ())
-        # threads_counter += 1
     except Exception as e:
         pass
 
     while threads_counter > 0:
         time.sleep(0.2)
+    tcp_server_socket.close()
 

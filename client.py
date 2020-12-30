@@ -39,11 +39,6 @@ def create_udp_connection_client():
             # recieve data and address of the server
             data, server_address = udp_client_socket.recvfrom(1024)
 
-            # TODO: for debug, delete it
-            print('received {} bytes from {}'.format(
-                len(data), server_address))
-            print(data)
-
             # get data from server in hex format
             server_data = struct.unpack('4s 1s 2s', data)
  
@@ -114,7 +109,7 @@ def create_tcp_connection_client():
     is_connected = False
     return
 
-
+# start the client
 while True:
     create_udp_connection_client()
     create_tcp_connection_client()
