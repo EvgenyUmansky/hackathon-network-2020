@@ -75,9 +75,14 @@ def create_tcp_connection_client():
         # send the team name to the server
         tcp_client_socket.sendall(team_name.encode())
 
+        # Receive the data in small chunks and retransmit it forever...
         while True:
             data = tcp_client_socket.recv(1024)
             print('received {!r}'.format(data))
+
+            if data:
+                print('sending data back to the server')
+                tcp_client_socket.sendall(data)
 
     except Exception as e: 
         print(e)
