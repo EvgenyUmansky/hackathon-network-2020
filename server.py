@@ -36,6 +36,7 @@ tcp_server_socket.bind((server_ip, tcp_port)) # bind the tcp socket to ip of the
 tcp_server_socket.listen(1) # listen for incoming connections, only 1 allowed to be unaccepted
 # tcp_server_socket.settimeout(1)
 
+# data about players
 players = {}
 group_1 = {}
 group_2 = {}
@@ -86,12 +87,14 @@ def create_teams_tcp():
         readable, writable, exceptional = select.select([tcp_server_socket], [], [], 0)
         for s in readable:
             if isinstance(s, socket.socket):
+                # create tcp connection with players
                 client_connection, client_address = tcp_server_socket.accept()
                 print('connection from', client_address)
                 team_name = client_connection.recv(1024).decode("utf-8")
                 players[team_name] = (client_address, client_connection)
                 print(players.keys())
 
+                # organaze random teams in 2 groups
                 teams_list=list(players.keys())
                 random.shuffle(teams_list)
 
@@ -99,6 +102,7 @@ def create_teams_tcp():
                 group_1_list = teams_list[:half] 
                 group_2_list = teams_list[half:]
 
+                # count spamming by team 
                 group_1 = { i : 0 for i in group_1_list }
                 group_2 = { i : 0 for i in group_2_list }
 
@@ -108,15 +112,15 @@ def create_teams_tcp():
     welcome_message = f"Welcome to Keyboard Spamming Battle Royale.\nGroup 1:\n==\n{group_1_names}\nGroup 2:\n==\n{group_2_names}\nStart pressing keys on your keyboard as fast as you can!!"
     
     try:
+        # start the game with thread for each game
         for key, client_data in players.items():
             threads_counter += 1
             _thread.start_new_thread(game(key, client_data), ())
     except Exception as e:
-        # pass
-        print(e)
-        time.sleep(1)
+        pass
 
 
+    # get the winner
     winner = 0
     winners_names = ""
     if group_1_score > group_2_score:
@@ -126,6 +130,7 @@ def create_teams_tcp():
         winners_names = winners_names.join(list(group_2.keys()))
         winner = 2
 
+    # create summer message and send it to clients
     summary = 'Game over!\nGroup 1 typed in {} characters. Group 2 typed in {} characters.\nGroup {} wins!\n\nCongratulations to the winners: {}'.format(
         group_1_score, group_2_score, winner, winners_names)
 
@@ -139,6 +144,7 @@ def create_teams_tcp():
 
 
 def game(team_name, client_data):
+    # start game for client
     global threads_counter, group_1_score, group_2_score
     # tcp_server_socket.sendall(welcome_message.encode())
     socket_game = client_data[1]
@@ -152,6 +158,7 @@ def game(team_name, client_data):
                     # client_connection, client_address = socket_game.accept()
                     key_pressed = socket_game.recv(1024).decode("utf-8")
 
+                    # count scores for two teams
                     if team_name in group_1:
                         group_1_score += len(key_pressed)
                         print(group_1_score)
@@ -159,21 +166,21 @@ def game(team_name, client_data):
                         group_2_score += len(key_pressed)
                         print(group_2_score)
                 except Exception as e:
-                    # pass
-                    print(e)
-                    time.sleep(1)
+                    pass
 
     print('FINISHED THE TCP game')
     threads_counter -= 1
     return
 
 while True:
+    # clear the lists 
     players = {}
     group_1 = {}
     group_2 = {}
     group_1_score = 0
     group_2_score = 0
     try:
+        # start the server
         _thread.start_new_thread(create_udp_connection_server, ())
         threads_counter += 1
         _thread.start_new_thread(create_teams_tcp, ())
@@ -181,8 +188,8 @@ while True:
         # _thread.start_new_thread(game(), ())
         # threads_counter += 1
     except Exception as e:
-        # pass
-        print(e)
-    while threads_counter > 0:
         pass
+
+    while threads_counter > 0:
+        time.sleep(0.2)
 
