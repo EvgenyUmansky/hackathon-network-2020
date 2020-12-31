@@ -81,21 +81,24 @@ def create_teams_tcp():
         for s in readable:
             if isinstance(s, socket.socket):
                 # create tcp connection with players
-                client_connection, client_address = tcp_server_socket.accept()
-                team_name = client_connection.recv(1024).decode("utf-8")
-                players[team_name] = (client_address, client_connection)
+                try:
+                    client_connection, client_address = tcp_server_socket.accept()
+                    team_name = client_connection.recv(1024).decode("utf-8")
+                    players[team_name] = (client_address, client_connection)
 
-                # organaze random teams in 2 groups
-                teams_list=list(players.keys())
-                random.shuffle(teams_list)
+                    # organaze random teams in 2 groups
+                    teams_list=list(players.keys())
+                    random.shuffle(teams_list)
 
-                half = len(teams_list) // 2
-                group_1_list = teams_list[:half] 
-                group_2_list = teams_list[half:]
+                    half = len(teams_list) // 2
+                    group_1_list = teams_list[:half]
+                    group_2_list = teams_list[half:]
 
-                # count spamming by team 
-                group_1 = { i : 0 for i in group_1_list }
-                group_2 = { i : 0 for i in group_2_list }
+                    # count spamming by team 
+                    group_1 = { i : 0 for i in group_1_list }
+                    group_2 = { i : 0 for i in group_2_list }
+                except:
+                    pass
 
     group_1_names = '\n'.join(group_1.keys())
     group_2_names = '\n'.join(group_2.keys())

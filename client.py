@@ -75,7 +75,7 @@ def create_tcp_connection_client():
         tcp_client_socket.sendall(team_name.encode())
 
         # Receive the data in small chunks and retransmit it forever...
-        # Start Game:
+        # Start Game: 
         # spouse to get the message of starting the game from the server
         data = tcp_client_socket.recv(1024).decode()
         if data:
