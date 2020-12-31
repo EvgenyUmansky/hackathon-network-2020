@@ -185,6 +185,6 @@ while True:
         pass
 
     while threads_counter > 0:
-        time.sleep(0.2)
+        pass
     tcp_server_socket.close()
 
